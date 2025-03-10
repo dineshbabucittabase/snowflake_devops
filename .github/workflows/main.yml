@@ -16,8 +16,6 @@ jobs:
 
     env:
       REPO_NAME: "quickstart_common.public.snowflake_devops_git_repo"
-      # SNOWFLAKE_CONNECTIONS_DEFAULT_AUTHENTICATOR: "SNOWFLAKE_JWT"
-      # SNOWFLAKE_CONNECTIONS_DEFAULT_PRIVATE_KEY_FILE: ".snowflake/snowflake_rsa_key"
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
@@ -28,11 +26,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Write private key secret as file
-      # - name: Configure Private Key
-      #   run: |
-      #     echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > .snowflake/snowflake_rsa_key
-
       # Install Snowflake CLI GitHub Action and point to config file
       - name: Install snowflake-cli
         uses: Snowflake-Labs/snowflake-cli-action@v1.5
@@ -45,16 +38,16 @@ jobs:
         run: snow git fetch "${REPO_NAME}"
 
       # Deploy pipeline with branch specific parameters
-      - name: Deploy data pipeline to ${{ github.ref_name }}
+      - name: Deploy data pipeline to dev
         run: |
-          BRANCH_NAME=${{ github.ref_name }}
+          BRANCH_NAME=dev
           if [ "${BRANCH_NAME}" == "prod" ]; then
             RETENTION_TIME=1
           else
             RETENTION_TIME=0
           fi
           snow git execute \
-            "@${REPO_NAME}/branches/${BRANCH_NAME}/steps/0[134]_*" \
+            "@${REPO_NAME}/branches/dev/steps/0[134]_*" \
             -D "environment=dev" \
             -D "retention_time=${RETENTION_TIME}"
 
@@ -63,8 +56,6 @@ jobs:
 
     env:
       REPO_NAME: "quickstart_common.public.snowflake_devops_git_repo"
-      # SNOWFLAKE_CONNECTIONS_DEFAULT_AUTHENTICATOR: "SNOWFLAKE_JWT"
-      # SNOWFLAKE_CONNECTIONS_DEFAULT_PRIVATE_KEY_FILE: ".snowflake/snowflake_rsa_key"
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
@@ -75,11 +66,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Write private key secret as file
-      # - name: Configure Private Key
-      #   run: |
-      #     echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > .snowflake/snowflake_rsa_key
-
       # Install Snowflake CLI GitHub Action and point to config file
       - name: Install snowflake-cli
         uses: Snowflake-Labs/snowflake-cli-action@v1.5
@@ -92,15 +78,15 @@ jobs:
         run: snow git fetch "${REPO_NAME}"
 
       # Deploy pipeline with branch specific parameters
-      - name: Deploy data pipeline to ${{ github.ref_name }}
+      - name: Deploy data pipeline to prod
         run: |
-          BRANCH_NAME=${{ github.ref_name }}
+          BRANCH_NAME=prod
           if [ "${BRANCH_NAME}" == "prod" ]; then
             RETENTION_TIME=1
           else
             RETENTION_TIME=0
           fi
           snow git execute \
-            "@${REPO_NAME}/branches/${BRANCH_NAME}/steps/0[134]_*" \
+            "@${REPO_NAME}/branches/prod/steps/0[134]_*" \
             -D "environment=prod" \
             -D "retention_time=${RETENTION_TIME}"
