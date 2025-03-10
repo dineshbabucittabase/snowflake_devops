@@ -19,8 +19,11 @@ jobs:
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
-      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}      
-
+      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: quickstart_common
+      SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: public 
+      SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: COMPUTE_WH
+ 
     steps:
       # Checkout step is necessary if you want to use a config file from your repo
       - name: Checkout repository
@@ -60,7 +63,10 @@ jobs:
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
-      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}     
+      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}  
+      SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: quickstart_common
+      SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: public 
+      SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: COMPUTE_WH         
 
     steps:
       # Checkout step is necessary if you want to use a config file from your repo
