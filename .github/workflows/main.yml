@@ -19,8 +19,11 @@ jobs:
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
-      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}      
-
+      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: quickstart_common
+      SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: public 
+      SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: COMPUTE_WH
+ 
     steps:
       # Checkout step is necessary if you want to use a config file from your repo
       - name: Checkout repository
@@ -47,12 +50,43 @@ jobs:
             RETENTION_TIME=0
           fi
           snow git execute \
-            "@${REPO_NAME}/branches/dev/steps/0[134]_*" \
-            -D "environment=dev" \
+            "@${REPO_NAME}/branches/dev/scripts/0[134]_*" \
+            -D "environment='dev'" \
             -D "retention_time=${RETENTION_TIME}"
 
-  deploy-prod:
+  manual-approval:
+    name: Manual Approval
+    runs-on: ubuntu-latest
     needs: deploy-dev
+    if: success() 
+
+    permissions:
+      issues: write
+          
+    steps:
+      - name: Await Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: dineshbabucittabase # Replace with GitHub usernames, with the free version you can only have an issue assigned to one username
+          minimum-approvals: 1
+          issue-title: "Manual Approval Required for Production Deployment"
+          issue-body: "Please approve or deny the deployment."
+
+  merge-branch:
+    needs: manual-approval    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: everlytic/branch-merge@1.1.2
+        with:
+          github_token: ${{ github.token }}
+          source_ref: ${{ github.ref }}
+          target_branch: 'prod'
+          commit_message_template: '[Automated] Merged {source_ref} into target {target_branch}'
+
+  deploy-prod:
+    needs: merge-branch
     runs-on: ubuntu-22.04
 
     env:
@@ -60,7 +94,10 @@ jobs:
       # Read connection secrets
       SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
-      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}     
+      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}  
+      SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: quickstart_common
+      SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: public 
+      SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: COMPUTE_WH         
 
     steps:
       # Checkout step is necessary if you want to use a config file from your repo
@@ -88,6 +125,6 @@ jobs:
             RETENTION_TIME=0
           fi
           snow git execute \
-            "@${REPO_NAME}/branches/prod/steps/0[134]_*" \
-            -D "environment=prod" \
+            "@${REPO_NAME}/branches/prod/scripts/0[134]_*" \
+            -D "environment='prod'" \
             -D "retention_time=${RETENTION_TIME}"
