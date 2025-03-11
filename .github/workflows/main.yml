@@ -49,7 +49,7 @@ jobs:
             RETENTION_TIME=0
           fi
           snow git execute \
-            "@${REPO_NAME}/branches/dev/scripts/0[134]_*" \
+            "@${REPO_NAME}/branches/dev/scripts/0*" \
             -D "environment='dev'" \
             -D "retention_time=${RETENTION_TIME}"
 
